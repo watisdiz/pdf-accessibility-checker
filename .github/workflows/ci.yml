@@ -31,6 +31,13 @@ jobs:
         with:
           context: .
           push: false
+          load: true
           tags: pdf-accessibility-checker:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Verify veraPDF starts with a read-only root filesystem
+        run: >-
+          docker run --rm --read-only
+          --tmpfs /scan-tmp:rw,noexec,nosuid,nodev,size=128m,uid=10001,gid=10001,mode=0700
+          pdf-accessibility-checker:ci
+          sh -lc 'test -f /opt/verapdf/config/app.xml && /opt/verapdf/verapdf --version'
