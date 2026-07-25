@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF Accessibility Checker</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+  <script src="{{ url_for('static', path='/app.js') }}" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="hero">
+      <p class="eyebrow">veraPDF · PDF/UA-1</p>
+      <h1>PDF Accessibility Checker</h1>
+      <p class="lead">
+        Tarkista PDF:n koneellisesti tarkistettavat PDF/UA-1-vaatimukset.
+        Hyväksytty tulos ei yksin takaa, että dokumentti on kokonaisuudessaan saavutettava.
+      </p>
+    </header>
+
+    <section class="card" aria-labelledby="upload-title">
+      <h2 id="upload-title">Valitse tarkistettava PDF</h2>
+      <form id="upload-form" novalidate>
+        <label class="drop-zone" id="drop-zone" for="pdf-file">
+          <span class="drop-zone__title">Pudota PDF tähän</span>
+          <span class="drop-zone__or">tai</span>
+          <span class="button-like">Valitse PDF</span>
+          <span class="drop-zone__hint">Enintään {{ max_upload_mb }} Mt. Tiedostoa ei säilytetä tarkistuksen jälkeen.</span>
+        </label>
+        <input id="pdf-file" name="file" type="file" accept="application/pdf,.pdf" required>
+        <p id="selected-file" class="selected-file" aria-live="polite">Ei valittua tiedostoa.</p>
+        <button id="submit-button" class="primary-button" type="submit" disabled>Tarkista PDF</button>
+      </form>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="result" class="card result" aria-labelledby="result-title" hidden>
+      <div class="result__header">
+        <div>
+          <p id="result-kicker" class="eyebrow"></p>
+          <h2 id="result-title">Tarkistuksen tulos</h2>
+        </div>
+        <button id="download-json" class="secondary-button" type="button">Lataa JSON-raportti</button>
+      </div>
+
+      <p id="result-summary" class="result__summary"></p>
+      <dl class="metrics">
+        <div><dt>Epäonnistuneet säännöt</dt><dd id="failed-rules">0</dd></div>
+        <div><dt>Epäonnistuneet tarkistukset</dt><dd id="failed-checks">0</dd></div>
+        <div><dt>Läpäistyt säännöt</dt><dd id="passed-rules">0</dd></div>
+        <div><dt>Käsittelyaika</dt><dd id="duration">0 s</dd></div>
+      </dl>
+
+      <div id="issues" class="issues"></div>
+
+      <aside class="notice" aria-label="Tärkeä rajaus">
+        <strong>Huomio:</strong> veraPDF tarkistaa vain koneellisesti varmennettavat kohdat.
+        Esimerkiksi vaihtoehtoisten tekstien laatu, looginen lukemisjärjestys ja sisällön ymmärrettävyys voivat vaatia manuaalisen tarkistuksen.
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

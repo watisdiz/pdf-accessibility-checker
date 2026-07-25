@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest
+      - run: python -m compileall -q app
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          load: true
+          tags: pdf-accessibility-checker:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Verify veraPDF starts with a read-only root filesystem
+        run: >-
+          docker run --rm --read-only
+          --tmpfs /scan-tmp:rw,noexec,nosuid,nodev,size=128m,uid=10001,gid=10001,mode=0700
+          pdf-accessibility-checker:ci
+          sh -lc 'test -f /opt/verapdf/config/app.xml && /opt/verapdf/verapdf --version'
