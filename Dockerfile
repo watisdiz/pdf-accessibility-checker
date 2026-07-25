@@ -32,6 +32,15 @@ RUN apt-get update \
     && chown -R checker:checker /app /scan-tmp
 
 COPY --from=verapdf-installer /opt/verapdf /opt/verapdf
+
+# veraPDF creates its default XML configuration on first launch. Generate it while
+# the image is still writable so the runtime container can keep a read-only root filesystem.
+RUN /opt/verapdf/verapdf --version >/tmp/verapdf-version.txt \
+    && test -s /tmp/verapdf-version.txt \
+    && test -f /opt/verapdf/config/app.xml \
+    && test -f /opt/verapdf/config/validator.xml \
+    && rm -f /tmp/verapdf-version.txt
+
 WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
