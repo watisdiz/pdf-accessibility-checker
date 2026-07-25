@@ -53,7 +53,8 @@ function renderIssues(issues) {
     const details = document.createElement('details');
     details.className = 'issue';
     const summary = document.createElement('summary');
-    summary.textContent = `${issue.specification}, kohta ${issue.clause} · ${issue.occurrences} esiintymää`;
+    const testNumber = issue.test_number || '–';
+    summary.textContent = `${issue.specification}, kohta ${issue.clause}, testi ${testNumber} · ${issue.occurrences} esiintymää`;
     const body = document.createElement('div');
     body.className = 'issue__body';
 
@@ -63,13 +64,21 @@ function renderIssues(issues) {
 
     const meta = document.createElement('p');
     meta.className = 'issue__meta';
-    meta.textContent = `Testi ${issue.test_number || '–'} · Kohde ${issue.object || '–'}`;
+    meta.textContent = `Kohde ${issue.object || '–'}`;
     body.append(meta);
 
     if (issue.contexts.length) {
       const heading = document.createElement('strong');
       heading.textContent = 'Tekniset kontekstit';
       body.append(heading);
+
+      if (issue.contexts.length < issue.occurrences) {
+        const limitNotice = document.createElement('p');
+        limitNotice.className = 'issue__meta';
+        limitNotice.textContent = `Näytetään ${issue.contexts.length} / ${issue.occurrences} teknistä kontekstia. veraPDF-raportin yksityiskohtainen listaus on rajattu.`;
+        body.append(limitNotice);
+      }
+
       const list = document.createElement('ul');
       issue.contexts.forEach((context) => {
         const item = document.createElement('li');
