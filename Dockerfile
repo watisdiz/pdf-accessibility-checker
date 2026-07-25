@@ -33,13 +33,16 @@ RUN apt-get update \
 
 COPY --from=verapdf-installer /opt/verapdf /opt/verapdf
 
-# veraPDF creates its default XML configuration on first launch. Generate it while
-# the image is still writable so the runtime container can keep a read-only root filesystem.
+# Generate installation defaults while the image is writable. At runtime veraPDF's
+# user configuration and Java temporary files are redirected to RAM-backed /scan-tmp.
 RUN /opt/verapdf/verapdf --version >/tmp/verapdf-version.txt \
     && test -s /tmp/verapdf-version.txt \
     && test -f /opt/verapdf/config/app.xml \
     && test -f /opt/verapdf/config/validator.xml \
     && rm -f /tmp/verapdf-version.txt
+
+ENV HOME=/scan-tmp \
+    JAVA_OPTS="-Duser.home=/scan-tmp -Djava.io.tmpdir=/scan-tmp"
 
 WORKDIR /app
 COPY requirements.txt ./
